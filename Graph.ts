@@ -77,6 +77,7 @@ class GraphNode<T> {
     }
 }
 
+
 export class Graph<T> {
     nodes: LinkedList<GraphNode<T>>
     count: number
@@ -91,7 +92,15 @@ export class Graph<T> {
     }
 
     removeNode(value: T) {
-
+        let node = this.nodes.getValueByCondition(nd => {return nd.value.value == value})
+        this.nodes.removeByValue(node)
+        let current_node = this.nodes.head
+        while (current_node) {
+            try {
+                current_node.value.removeLink(node)
+            } catch (e) {}
+            current_node = current_node.next
+        }
     }
 
     addLink(from: T, to:T, cost: number) {

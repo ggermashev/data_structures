@@ -41,8 +41,8 @@ var ListNode = /** @class */ (function () {
 }());
 var LinkedList = /** @class */ (function () {
     function LinkedList() {
-        this.head = null;
-        this.tail = null;
+        this._head = null;
+        this._tail = null;
         this._length = 0;
     }
     Object.defineProperty(LinkedList.prototype, "length", {
@@ -52,39 +52,53 @@ var LinkedList = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(LinkedList.prototype, "head", {
+        get: function () {
+            return this._head;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(LinkedList.prototype, "tail", {
+        get: function () {
+            return this._tail;
+        },
+        enumerable: false,
+        configurable: true
+    });
     LinkedList.prototype.append = function (value) {
         if (!this.head) {
-            this.head = new ListNode(value);
-            this.tail = this.head;
+            this._head = new ListNode(value);
+            this._tail = this.head;
             this._length = 1;
         }
         else {
             var node = new ListNode(value, null, this.tail);
             this.tail.next = node;
-            this.tail = node;
+            this._tail = node;
             this._length += 1;
         }
     };
     LinkedList.prototype.prepand = function (value) {
         if (!this.head) {
-            this.head = new ListNode(value);
-            this.tail = this.head;
+            this._head = new ListNode(value);
+            this._tail = this.head;
             this._length = 1;
         }
         else {
             var node = new ListNode(value, this.head, null);
             this.head.prev = node;
-            this.head = node;
+            this._head = node;
             this._length += 1;
         }
     };
     LinkedList.prototype.removeFront = function () {
         if (this.length == 1) {
-            this.head = this.tail = null;
+            this._head = this._tail = null;
             this._length = 0;
         }
         else if (this.length > 1) {
-            this.head = this.head.next;
+            this._head = this.head.next;
             this.head.prev = null;
             this._length -= 1;
         }
@@ -94,11 +108,11 @@ var LinkedList = /** @class */ (function () {
     };
     LinkedList.prototype.removeBack = function () {
         if (this.length == 1) {
-            this.head = this.tail = null;
+            this._head = this._tail = null;
             this._length = 0;
         }
         else if (this.length > 1) {
-            this.tail = this.tail.prev;
+            this._tail = this.tail.prev;
             this.tail.next = null;
             this._length -= 1;
         }

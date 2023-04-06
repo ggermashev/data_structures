@@ -32,8 +32,19 @@ function testGraph() {
         console.log("удалили 1-3\n", graph.toString());
         graph.addDualLink(1, 3, 4);
         console.log("Добавили двойную связь 1-3\n", graph.toString());
-        graph.addLink(1, 3, 5);
-        console.log("Повторно добавили связь 1-3\n", graph.toString());
+        try {
+            graph.addLink(1, 3, 5);
+            console.log("Повторно добавили связь 1-3\n", graph.toString());
+        }
+        catch (e) {
+            console.log(e.message);
+        }
+        graph.removeNode(3);
+        console.log("Удалили узел 3", graph.toString());
+        graph.removeNode(2);
+        console.log("Удалили узел 2", graph.toString());
+        graph.removeNode(1);
+        console.log("Удалили узел 1", graph.toString());
     }
     catch (e) {
         console.log(e.message);

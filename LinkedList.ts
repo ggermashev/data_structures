@@ -36,13 +36,13 @@ class ListNode<T> {
 
 
 export class LinkedList<T> {
-    private head: ListNode<T>
-    private tail: ListNode<T>
+    private _head: ListNode<T>
+    private _tail: ListNode<T>
     private _length: number
 
     constructor() {
-        this.head = null
-        this.tail = null
+        this._head = null
+        this._tail = null
         this._length = 0
     }
 
@@ -50,38 +50,46 @@ export class LinkedList<T> {
         return this._length
     }
 
+    get head() {
+        return this._head
+    }
+
+    get tail() {
+        return this._tail
+    }
+
     append(value: T) {
         if (!this.head) {
-            this.head = new ListNode<T>(value)
-            this.tail = this.head
+            this._head = new ListNode<T>(value)
+            this._tail = this.head
             this._length = 1
         } else {
             let node: ListNode<T> = new ListNode<T>(value, null, this.tail)
             this.tail.next = node
-            this.tail = node
+            this._tail = node
             this._length += 1
         }
     }
 
     prepand(value: T) {
         if (!this.head) {
-            this.head = new ListNode<T>(value)
-            this.tail = this.head
+            this._head = new ListNode<T>(value)
+            this._tail = this.head
             this._length = 1
         } else {
             let node: ListNode<T> = new ListNode<T>(value, this.head, null)
             this.head.prev = node
-            this.head = node
+            this._head = node
             this._length += 1
         }
     }
 
     removeFront() {
         if (this.length == 1) {
-            this.head = this.tail = null
+            this._head = this._tail = null
             this._length = 0
         } else if (this.length > 1) {
-            this.head = this.head.next
+            this._head = this.head.next
             this.head.prev = null
             this._length -= 1
         } else {
@@ -91,10 +99,10 @@ export class LinkedList<T> {
 
     removeBack() {
         if (this.length == 1) {
-            this.head = this.tail = null
+            this._head = this._tail = null
             this._length = 0
         } else if (this.length > 1) {
-            this.tail = this.tail.prev
+            this._tail = this.tail.prev
             this.tail.next = null
             this._length -= 1
         } else {

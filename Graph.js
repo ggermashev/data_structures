@@ -83,6 +83,19 @@ var Graph = /** @class */ (function () {
     }
     Graph.prototype.addNode = function (value) {
         this.nodes.append(new GraphNode(value));
+        this.count += 1;
+    };
+    Graph.prototype.removeNode = function (value) {
+        var node = this.nodes.getValueByCondition(function (nd) { return nd.value.value == value; });
+        this.nodes.removeByValue(node);
+        var current_node = this.nodes.head;
+        while (current_node) {
+            try {
+                current_node.value.removeLink(node);
+            }
+            catch (e) { }
+            current_node = current_node.next;
+        }
     };
     Graph.prototype.addLink = function (from, to, cost) {
         var node_from = this.nodes.getValueByCondition(function (list_node) { return list_node.value.value === from; });
