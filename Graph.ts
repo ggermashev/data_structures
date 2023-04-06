@@ -1,10 +1,13 @@
 import {LinkedList} from "./LinkedList";
 
-class Link<T> {
-    to: GraphNode<T>
-    cost: number
 
-    constructor(to:GraphNode<T>, cost: number) {
+class Link<T> {
+    public from: GraphNode<T>
+    public to: GraphNode<T>
+    public cost: number
+
+    constructor(from: GraphNode<T>, to:GraphNode<T>, cost: number) {
+        this.from = from
         this.to = to
         this.cost = cost
     }
@@ -15,9 +18,43 @@ class Link<T> {
     }
 }
 
+
+class Way<T> extends Link<T> {
+    private _totalCost: number
+    private _chain: LinkedList<GraphNode<T>>
+    private length: number
+
+    constructor(from: GraphNode<T>, to: GraphNode<T>, cost: number, totalCost?: number, chain?: LinkedList<GraphNode<T>>) {
+        super(from, to, cost);
+        this.totalCost = totalCost ?? cost
+        if (!chain) {
+            this._chain = new LinkedList<GraphNode<T>>()
+            this._chain.append(from)
+            this._chain.append(to)
+        } else {
+            this._chain = chain.copy()
+            this._chain.append(to)
+        }
+    }
+
+    set totalCost(cost: number) {
+        this._totalCost = cost
+    }
+
+    get totalCost() {
+        return this._totalCost
+    }
+
+    get chain() {
+        return this._chain
+    }
+
+}
+
+
 class GraphNode<T> {
     private _value: T
-    private links: LinkedList<Link<T>>
+    private _links: LinkedList<Link<T>>
 
     set value(value: T) {
         this._value = value
@@ -27,14 +64,18 @@ class GraphNode<T> {
         return this._value
     }
 
+    get links() {
+        return this._links
+    }
+
     constructor(value: T) {
         this.value = value
-        this.links = new LinkedList<Link<T>>()
+        this._links = new LinkedList<Link<T>>()
     }
 
 
     addLink(node: GraphNode<T>, cost: number) {
-        let link = new Link<T>(node, cost)
+        let link = new Link<T>(this, node, cost)
         if (!this.links.getValueByCondition(node_list => {return node_list.value.to === link.to})) {
             this.links.append(link)
         } else {
@@ -43,8 +84,8 @@ class GraphNode<T> {
     }
 
     addDualLink(node: GraphNode<T>, cost: number) {
-        let link1 = new Link<T>(node, cost)
-        let link2 = new Link(this, cost)
+        let link1 = new Link<T>(this, node, cost)
+        let link2 = new Link(node, this, cost)
         if (!this.links.getValueByCondition(node_list => {return node_list.value.to === link1.to}) &&
             !node.links.getValueByCondition(node_list => {return node_list.value.to === link2.to})) {
             this.links.append(link1)
@@ -130,5 +171,27 @@ export class Graph<T> {
 
     toString() {
         return this.nodes.toString()
+    }
+
+    getShortestWay(from: T, to: T) {
+        let current_node = this.nodes.getValueByCondition(list_node => list_node.value.value == from)
+        let queue = new LinkedList<GraphNode<T>>()
+        queue.append(current_node)
+        let ways = new LinkedList<Way<T>>()
+        while (queue.length > 0) {
+            let current_link = queue.getFirst().links.head
+            queue.removeFront()
+            while (current_link) {
+                let way = ways.getValueByCondition(list_node => {return list_node.value.to.value === current_link.value.from.value})
+                    ?? new Way(current_link.value.from, current_link.value.to, current_link.value.cost)
+                let next_way = new Way(current_link.value.from, current_link.value.to, current_link.value.cost, way.totalCost + current_link.value.cost, way.chain)
+                ways.prepend(next_way)
+                queue.append(current_link.value.to)
+                if (current_link.value.to.value !== to) {
+                    queue.append(current_link.value.to)
+                }
+                current_link = current_link.next
+            }
+        }
     }
 }

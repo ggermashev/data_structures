@@ -5,7 +5,7 @@ function testLinkedList() {
     let list = new LinkedList<number>()
     list.append(2)
     list.append(3)
-    list.prepand(1)
+    list.prepend(1)
     list.insert(4,1)
     console.log("Добавили",list.toString())
     list.removeFront()

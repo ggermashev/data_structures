@@ -71,7 +71,7 @@ export class LinkedList<T> {
         }
     }
 
-    prepand(value: T) {
+    prepend(value: T) {
         if (!this.head) {
             this._head = new ListNode<T>(value)
             this._tail = this.head
@@ -115,7 +115,7 @@ export class LinkedList<T> {
             this.append(value)
         } else {
             if (index == 0) {
-                this.prepand(value)
+                this.prepend(value)
             } else if (index == this.length) {
                 this.append(value)
             } else {
@@ -232,4 +232,15 @@ export class LinkedList<T> {
         res = `[${res}]`
         return res
     }
+
+    copy() {
+        let res = new LinkedList<T>()
+        let currentNode = this.head
+        while (currentNode) {
+            res.append(currentNode.value)
+            currentNode = currentNode.next
+        }
+        return res
+    }
+
 }
