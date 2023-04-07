@@ -42,6 +42,17 @@ function testGraph() {
         console.log("Удалили узел 2", graph.toString())
         graph.removeNode(1)
         console.log("Удалили узел 1", graph.toString())
+        graph.addNode(1)
+        graph.addNode(2)
+        graph.addNode(3)
+        graph.addNode(4)
+        graph.addLink(1,2,1)
+        graph.addLink(2,4,2)
+        graph.addLink(4,3, 1)
+        graph.addLink(1,4,5)
+        console.log("Добавили связи", graph.toString())
+        let shortestWay = graph.getShortestWay(1,4)
+        console.log("Кратчайший путь 1-4:\n", shortestWay.toString())
     } catch(e) {
         console.log(e.message)
     }

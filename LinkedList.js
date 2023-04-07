@@ -79,7 +79,7 @@ var LinkedList = /** @class */ (function () {
             this._length += 1;
         }
     };
-    LinkedList.prototype.prepand = function (value) {
+    LinkedList.prototype.prepend = function (value) {
         if (!this.head) {
             this._head = new ListNode(value);
             this._tail = this.head;
@@ -126,7 +126,7 @@ var LinkedList = /** @class */ (function () {
         }
         else {
             if (index == 0) {
-                this.prepand(value);
+                this.prepend(value);
             }
             else if (index == this.length) {
                 this.append(value);
@@ -220,6 +220,17 @@ var LinkedList = /** @class */ (function () {
         }
         return null;
     };
+    LinkedList.prototype.getValuesByCondition = function (condition) {
+        var current_node = this.head;
+        var result = new LinkedList();
+        while (current_node) {
+            if (condition(current_node)) {
+                result.append(current_node.value);
+            }
+            current_node = current_node.next;
+        }
+        return result;
+    };
     LinkedList.prototype.toString = function () {
         var res = "";
         var current_node = this.head;
@@ -235,6 +246,15 @@ var LinkedList = /** @class */ (function () {
             current_node = current_node.next;
         }
         res = "[".concat(res, "]");
+        return res;
+    };
+    LinkedList.prototype.copy = function () {
+        var res = new LinkedList();
+        var currentNode = this.head;
+        while (currentNode) {
+            res.append(currentNode.value);
+            currentNode = currentNode.next;
+        }
         return res;
     };
     return LinkedList;

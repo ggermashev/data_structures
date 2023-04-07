@@ -6,14 +6,14 @@ class Link<T> {
     public to: GraphNode<T>
     public cost: number
 
-    constructor(from: GraphNode<T>, to:GraphNode<T>, cost: number) {
+    constructor(from: GraphNode<T>, to: GraphNode<T>, cost: number) {
         this.from = from
         this.to = to
         this.cost = cost
     }
 
     toString() {
-        let res = `to: ${this.to.value.toString()} cost: ${this.cost}`
+        let res = `from: ${this.from.value.toString()} to: ${this.to.value.toString()} cost: ${this.cost}`
         return res
     }
 }
@@ -27,11 +27,17 @@ class Way<T> extends Link<T> {
     constructor(from: GraphNode<T>, to: GraphNode<T>, cost: number, totalCost?: number, chain?: LinkedList<GraphNode<T>>) {
         super(from, to, cost);
         this.totalCost = totalCost ?? cost
+        // console.log(from.toString())
         if (!chain) {
             this._chain = new LinkedList<GraphNode<T>>()
             this._chain.append(from)
             this._chain.append(to)
         } else {
+            if (chain.getValueByCondition(list_node => {
+                return list_node.value.value == to.value
+            })) {
+                return null
+            }
             this._chain = chain.copy()
             this._chain.append(to)
         }
@@ -49,6 +55,13 @@ class Way<T> extends Link<T> {
         return this._chain
     }
 
+    toString() {
+        if (this.chain) {
+            return `totalCost: ${this.totalCost} chain: ${this.chain.toString()}\n`
+        } else {
+            return ""
+        }
+    }
 }
 
 
@@ -76,7 +89,9 @@ class GraphNode<T> {
 
     addLink(node: GraphNode<T>, cost: number) {
         let link = new Link<T>(this, node, cost)
-        if (!this.links.getValueByCondition(node_list => {return node_list.value.to === link.to})) {
+        if (!this.links.getValueByCondition(node_list => {
+            return node_list.value.to === link.to
+        })) {
             this.links.append(link)
         } else {
             throw new Error("Link already exists")
@@ -86,8 +101,12 @@ class GraphNode<T> {
     addDualLink(node: GraphNode<T>, cost: number) {
         let link1 = new Link<T>(this, node, cost)
         let link2 = new Link(node, this, cost)
-        if (!this.links.getValueByCondition(node_list => {return node_list.value.to === link1.to}) &&
-            !node.links.getValueByCondition(node_list => {return node_list.value.to === link2.to})) {
+        if (!this.links.getValueByCondition(node_list => {
+                return node_list.value.to === link1.to
+            }) &&
+            !node.links.getValueByCondition(node_list => {
+                return node_list.value.to === link2.to
+            })) {
             this.links.append(link1)
             node.links.append(link2)
         } else {
@@ -97,14 +116,26 @@ class GraphNode<T> {
     }
 
     removeLink(node: GraphNode<T>) {
-        let link = this.links.getValueByCondition((list_node) => {if (list_node.value.to === node) {return true}})
+        let link = this.links.getValueByCondition((list_node) => {
+            if (list_node.value.to === node) {
+                return true
+            }
+        })
         if (!link) throw new Error("no such link")
         this.links.removeByValue(link)
     }
 
     removeDualLink(node: GraphNode<T>) {
-        let link1 = this.links.getValueByCondition((list_node) => {if (list_node.value.to === node) {return true}})
-        let link2 = node.links.getValueByCondition((list_node) => {if (list_node.value.to === this) {return true}})
+        let link1 = this.links.getValueByCondition((list_node) => {
+            if (list_node.value.to === node) {
+                return true
+            }
+        })
+        let link2 = node.links.getValueByCondition((list_node) => {
+            if (list_node.value.to === this) {
+                return true
+            }
+        })
         if (!link1 || !link2) {
             throw new Error("no such links")
         }
@@ -133,18 +164,21 @@ export class Graph<T> {
     }
 
     removeNode(value: T) {
-        let node = this.nodes.getValueByCondition(nd => {return nd.value.value == value})
+        let node = this.nodes.getValueByCondition(nd => {
+            return nd.value.value == value
+        })
         this.nodes.removeByValue(node)
         let current_node = this.nodes.head
         while (current_node) {
             try {
                 current_node.value.removeLink(node)
-            } catch (e) {}
+            } catch (e) {
+            }
             current_node = current_node.next
         }
     }
 
-    addLink(from: T, to:T, cost: number) {
+    addLink(from: T, to: T, cost: number) {
         let node_from = this.nodes.getValueByCondition((list_node) => list_node.value.value === from)
         let node_to = this.nodes.getValueByCondition((list_node) => list_node.value.value === to)
         // console.log(node_from.toString())
@@ -174,7 +208,9 @@ export class Graph<T> {
     }
 
     getShortestWay(from: T, to: T) {
-        let current_node = this.nodes.getValueByCondition(list_node => list_node.value.value == from)
+        let current_node = this.nodes.getValueByCondition(list_node => {
+            return list_node.value.value == from
+        })
         let queue = new LinkedList<GraphNode<T>>()
         queue.append(current_node)
         let ways = new LinkedList<Way<T>>()
@@ -182,16 +218,43 @@ export class Graph<T> {
             let current_link = queue.getFirst().links.head
             queue.removeFront()
             while (current_link) {
-                let way = ways.getValueByCondition(list_node => {return list_node.value.to.value === current_link.value.from.value})
-                    ?? new Way(current_link.value.from, current_link.value.to, current_link.value.cost)
-                let next_way = new Way(current_link.value.from, current_link.value.to, current_link.value.cost, way.totalCost + current_link.value.cost, way.chain)
-                ways.prepend(next_way)
-                queue.append(current_link.value.to)
-                if (current_link.value.to.value !== to) {
-                    queue.append(current_link.value.to)
+                let continue_ways = ways.getValuesByCondition(list_node => {
+                    return list_node.value.to.value === current_link.value.from.value
+                })
+
+                if (continue_ways.length === 0) {
+                    let next_way = new Way(current_link.value.from, current_link.value.to, current_link.value.cost)
+                    if (next_way.from.value !== to) {
+                        ways.prepend(next_way)
+                        queue.append(current_link.value.to)
+                    }
+                } else {
+                    let way = continue_ways.head
+                    while (way) {
+                        // ways.removeByValue(way.value)
+                        let next_way = new Way(current_link.value.from, current_link.value.to, current_link.value.cost,
+                            way.value.totalCost + current_link.value.cost, way.value.chain)
+                        if (next_way.from.value !== to) {
+                            ways.prepend(next_way)
+                            queue.append(current_link.value.to)
+                        }
+                        way = way.next
+                    }
                 }
                 current_link = current_link.next
             }
         }
+        let min_way = ways.head
+        let current_way = ways.head
+        while (current_way) {
+            if (current_way.value.to.value == to) {
+                if (current_way.value.totalCost < min_way.value.totalCost) {
+                    min_way = current_way
+                }
+            }
+            current_way = current_way.next
+        }
+        return min_way.value.chain
     }
+
 }

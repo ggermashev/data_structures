@@ -216,6 +216,18 @@ export class LinkedList<T> {
         return null
     }
 
+    getValuesByCondition(condition: (node: ListNode<T>) => boolean) {
+        let current_node = this.head
+        let result = new LinkedList<T>()
+        while (current_node) {
+            if (condition(current_node)) {
+                result.append(current_node.value)
+            }
+            current_node = current_node.next
+        }
+        return result
+    }
+
     toString() {
         let res: string = ""
         let current_node = this.head
